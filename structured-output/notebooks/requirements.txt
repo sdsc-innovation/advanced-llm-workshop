@@ -1,0 +1,5 @@
+numpy
+pandas
+pydantic
+openai
+pymupdf4llm

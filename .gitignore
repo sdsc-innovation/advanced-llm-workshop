@@ -9,3 +9,4 @@
 
 # OSX-specific
 .DS_Store
+venv
