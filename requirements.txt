@@ -1,0 +1,7 @@
+numpy
+pandas
+pydantic
+openai
+chromadb
+matplotlib
+tiktoken
