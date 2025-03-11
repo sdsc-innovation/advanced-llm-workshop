@@ -1,0 +1,11 @@
+# Python cache
+*.pyc
+.ipynb_checkpoints/
+*.egg-info/
+
+# IDE settings
+.vscode/
+.idea/
+
+# OSX-specific
+.DS_Store
