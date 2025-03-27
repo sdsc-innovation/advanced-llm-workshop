@@ -23,11 +23,11 @@ class Generator:
     def _transform_chunks(self, chunks: list[Chunk]) -> str:
         context = ""
         for i, chunk in enumerate(chunks):
-            context += f"\n\nDocument {i+1}: \n"
+            context += f"\n\nChunk {i+1}: \n"
             if chunk.data_type == DataType.TEXT:
                 context += chunk.content
             elif chunk.data_type == DataType.IMAGE:
-                context += f"Image from document {i+1} attached in next messages."
+                context += f"Image from chunk {i+1} attached in next messages."
             else:
                 raise ValueError("Unsupported data type")
         return context
@@ -59,7 +59,7 @@ class Generator:
 
         if "step_by_step_thinking" in answer:
             step_by_step_thinking = answer["step_by_step_thinking"]
-            document_used = answer["document_used"]
+            chunk_used = answer["chunk_used"]
             answer = (
                 json.dumps(answer["answer"], ensure_ascii=False)
                 if isinstance(answer["answer"], dict)
@@ -68,7 +68,7 @@ class Generator:
 
             return {
                 "step_by_step_thinking": step_by_step_thinking,
-                "document_used": document_used,
+                "chunk_used": chunk_used,
                 "answer": answer,
             }
         else:
@@ -95,7 +95,7 @@ class Generator:
                         "content": [
                             {
                                 "type": "text",
-                                "text": f"Annex: Image from document {i+1}",
+                                "text": f"Annex: Image from chunk {i+1}",
                             },
                             {
                                 "type": "image_url",
@@ -164,14 +164,14 @@ def reciprocal_rank_fusion(
             score = result["score"]
             chunk = result["chunk"]
 
-            # Initialize the dictionaries for new document IDs
+            # Initialize the dictionaries for new chunk IDs
             if doc_id not in fused_scores:
                 fused_scores[doc_id] = 0
                 doc_chunks[doc_id] = chunk
                 score_sums[doc_id] = 0
                 score_counts[doc_id] = 0
 
-            # Accumulate the total score and count the occurrences for each document ID
+            # Accumulate the total score and count the occurrences for each chunk ID
             score_sums[doc_id] += score
             score_counts[doc_id] += 1
 
@@ -205,14 +205,14 @@ class DefaultRAG:
         text_embedding_model,
         text_vector_store,
         generator,
-        query_expansion_system_message: str,
-        query_expansion_template_query: str,
-        params: dict[str, str | float | int],
-        image_embedding_model=None,
+        query_expansion_system_message: str | None = None,
+        query_expansion_template_query: str | None = None,
+        params: dict[str, str | float | int] = {},
+        image_text_embedding_model=None,
         image_vector_store=None,
     ):
         self.llm = llm
-        if image_embedding_model is None or image_vector_store is None:
+        if image_text_embedding_model is None or image_vector_store is None:
             self.retriever = VectorStoreRetriever(
                 text_embedding_model, text_vector_store
             )
@@ -220,7 +220,7 @@ class DefaultRAG:
             self.retriever = VectorStoreRetriever(
                 text_embedding_model,
                 text_vector_store,
-                image_embedding_model,
+                image_text_embedding_model,
                 image_vector_store,
             )
 
