@@ -35,7 +35,7 @@ class OpenAITextEmbeddings:
 
 class VLM2VecTextEmbeddings:
     def __init__(self):
-        self.base_url = "https://compute.datascience.ch/vlm2vec-innovation"
+        self.base_url = "https://vlm2vec-api.runai-innovation-clement.inference.compute.datascience.ch/"
 
     # Work only with 1 text (no batching)
     def get_embedding(self, text: str) -> np.ndarray:
@@ -48,7 +48,7 @@ class VLM2VecTextEmbeddings:
 
 class VLM2VecImageEmbeddings:
     def __init__(self):
-        self.base_url = "https://compute.datascience.ch/vlm2vec-innovation"
+        self.base_url = "https://vlm2vec-api.runai-innovation-clement.inference.compute.datascience.ch/"
 
     # Work only with 1 image in base64 (no batching)
     def get_embedding(self, imagebase64: str) -> np.ndarray:
