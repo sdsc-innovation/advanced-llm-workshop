@@ -51,7 +51,7 @@ class PDFExtractorAPI:
         pass
 
     def extract_text_and_images(self, pdf_file_path: str) -> tuple[str, list]:
-        BASE_URL = "https://vlm2vec-api.runai-innovation-clement.inference.compute.datascience.ch/"
+        BASE_URL = "https://vlm2vec-pdf-api.runai-innovation-clement.inference.compute.datascience.ch"
         # Send the request with the file directly
         with open(pdf_file_path, "rb") as pdf_file:
             files = {"pdf_file": (pdf_file_path, pdf_file, "application/pdf")}
