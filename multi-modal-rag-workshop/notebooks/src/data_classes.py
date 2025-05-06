@@ -18,7 +18,7 @@ class Chunk(BaseModel):
 
 
 class Roles(str, Enum):
-    SYSTEM = "system"
+    DEVELOPER = "developer"  # Previously, system
     USER = "user"
     ASSISTANT = "assistant"
     TOOL = "tool"
