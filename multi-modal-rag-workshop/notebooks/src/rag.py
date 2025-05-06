@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 
 from src.vectorstore import VectorStoreRetriever
-from src.data_classes import Chunk, LLMMessage, DataType, Roles
+from src.constants_and_data_classes import Chunk, LLMMessage, DataType, Roles
 
 
 class Generator:

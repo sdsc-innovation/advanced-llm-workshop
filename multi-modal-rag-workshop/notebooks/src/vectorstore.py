@@ -2,7 +2,7 @@ import numpy as np
 
 import chromadb
 
-from src.data_classes import Chunk
+from src.constants_and_data_classes import Chunk
 
 
 class ChromaDBVectorStore:

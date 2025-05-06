@@ -2,7 +2,7 @@ from typing import Optional
 
 from openai import OpenAI
 
-from src.data_classes import LLMMessage
+from src.constants_and_data_classes import LLMMessage
 
 
 class OpenAILLM:
