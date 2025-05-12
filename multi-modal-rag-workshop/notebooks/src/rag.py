@@ -6,18 +6,18 @@ import matplotlib.pyplot as plt
 from PIL import Image
 
 from src.vectorstore import VectorStoreRetriever
-from src.data_classes import Chunk, LLMMessage, DataType, Roles
+from src.constants_and_data_classes import Chunk, LLMMessage, DataType, Roles
 
 
 class Generator:
     def __init__(
         self,
         llm,
-        system_prompt: str,
+        developer_prompt: str,
         rag_template: str,
     ):
         self.llm = llm
-        self.system_prompt = system_prompt
+        self.developer_prompt = developer_prompt
         self.rag_template = rag_template
 
     def _transform_chunks(self, chunks: list[Chunk]) -> str:
@@ -32,11 +32,11 @@ class Generator:
                 raise ValueError("Unsupported data type")
         return context
 
-    def _get_system_message(self) -> dict[str, str]:
-        system_prompt = self.system_prompt
+    def _get_developer_message(self) -> dict[str, str]:
+        developer_prompt = self.developer_prompt
         return {
-            "role": Roles.SYSTEM,
-            "content": [{"type": "text", "text": system_prompt}],
+            "role": Roles.DEVELOPER,
+            "content": [{"type": "text", "text": developer_prompt}],
         }
 
     def _apply_rag_template(self, query: str, context: str) -> dict[str, str]:
@@ -82,7 +82,7 @@ class Generator:
         verbose: bool = False,
     ) -> tuple[LLMMessage, float]:
         conversation = [
-            self._get_system_message(),
+            self._get_developer_message(),
             *history,
             self._apply_rag_template(query, self._transform_chunks(chunks)),
         ]
@@ -128,7 +128,7 @@ class Generator:
 def query_expansion(
     query: str,
     llm,
-    system_message: str,
+    developer_message: str,
     template_query_expansion: str,
     expansion_number: int = 2,
     verbose: bool = False,
@@ -139,7 +139,7 @@ def query_expansion(
             query=query, expansion_number=expansion_number
         ),
     }
-    conversation = [system_message, query_expansion_message]
+    conversation = [developer_message, query_expansion_message]
 
     generated_queries, cost = llm.generate(conversation)
     generated_queries = generated_queries.content.strip().split("\n")
@@ -205,7 +205,7 @@ class DefaultRAG:
         text_embedding_model,
         text_vector_store,
         generator,
-        query_expansion_system_message: str | None = None,
+        query_expansion_developer_message: str | None = None,
         query_expansion_template_query: str | None = None,
         params: dict[str, str | float | int] = {},
         image_text_embedding_model=None,
@@ -225,7 +225,7 @@ class DefaultRAG:
             )
 
         self.generator = generator
-        self.query_expansion_system_message = query_expansion_system_message
+        self.query_expansion_developer_message = query_expansion_developer_message
         self.query_expansion_template_query = query_expansion_template_query
 
         if "top_k_text" in params:
@@ -252,7 +252,7 @@ class DefaultRAG:
             queries, expansion_cost = query_expansion(
                 query,
                 self.llm,
-                self.query_expansion_system_message,
+                self.query_expansion_developer_message,
                 self.query_expansion_template_query,
                 self.number_query_expansion,
                 verbose,

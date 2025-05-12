@@ -3,6 +3,10 @@ from enum import Enum
 
 from pydantic import BaseModel, Field
 
+API_BASE_URL = (
+    "https://vlm2vec-pdf-api.runai-innovation-clement.inference.compute.datascience.ch"
+)
+
 
 class DataType(str, Enum):
     TEXT = "text"
@@ -18,7 +22,7 @@ class Chunk(BaseModel):
 
 
 class Roles(str, Enum):
-    SYSTEM = "system"
+    DEVELOPER = "developer"  # Previously, system
     USER = "user"
     ASSISTANT = "assistant"
     TOOL = "tool"

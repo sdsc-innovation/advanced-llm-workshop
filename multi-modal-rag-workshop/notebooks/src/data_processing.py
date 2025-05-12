@@ -1,23 +1,112 @@
-import os
+import sys
 import re
-import base64
 import requests
+import subprocess
+import base64
 
-#  pymupdf4llm
-# import fitz
-
-from src.data_classes import Chunk, DataType
+from src.constants_and_data_classes import Chunk, DataType, API_BASE_URL
 
 
-"""
 class PDFExtractor:
+    def __init__(self):
+        self.extractor = None
+
+    def extract_text_and_images(
+        self, pdf_file_path: str
+    ) -> tuple[str, str, list[dict]]:
+        if self.extractor is None:
+            try:
+                self.extractor = PDFExtractorAPI()
+                return self.extractor.extract_text_and_images(pdf_file_path)
+            except (requests.RequestException, Exception) as e:
+                print(
+                    "API IS NOT REACHABLE!\n"
+                    "Using fallback extractor instead: performances might be worse and "
+                    "notebook comments might not be matching the outputs!\n"
+                    f"{e}"
+                )
+                self.extractor = PDFExtractorFallback()
+                return self.extractor.extract_text_and_images(pdf_file_path)
+
+        return self.extractor.extract_text_and_images(pdf_file_path)
+
+
+class PDFExtractorAPI:
     def __init__(self):
         pass
 
-    def extract_text(self, pdf_file_path: str) -> str:
-        return pymupdf4llm.to_markdown(pdf_file_path)
+    def extract_text_and_images(
+        self, pdf_file_path: str
+    ) -> tuple[str, str, list[dict]]:
+        # Send the request with the file directly
+        with open(pdf_file_path, "rb") as pdf_file:
+            files = {"pdf_file": (pdf_file_path, pdf_file, "application/pdf")}
+            response = requests.post(f"{API_BASE_URL}/v1/pdf_to_markdown", files=files)
+
+        # Process the response
+        result = response.json()
+        markdown_text = result["markdown"]
+        images = result["images"]
+
+        images_new_format = []
+        for image in images:
+            image_dict = {}
+            image_dict["name"] = image["filename"]
+            image_dict["image_base64"] = image["data"]
+            image_dict["image_ext"] = image["format"]
+            images_new_format.append(image_dict)
+
+        return result, markdown_text, images_new_format
+
+
+class PDFExtractorFallback:
+    # Will be used only if the API is not reachable
+
+    def __init__(self):
+        try:
+            import pymupdf4llm
+            import fitz
+        except ImportError:
+            print("Installing libraries for fallback PDFExtractor...")
+            for library in ["pymupdf", "pymupdf4llm"]:
+                subprocess.check_call([sys.executable, "-m", "pip", "install", library])
+
+        pass
+
+    def extract_text_and_images(
+        self, pdf_file_path: str
+    ) -> tuple[str, list, list[dict]]:
+        import pymupdf4llm
+        import fitz
+
+        markdown_text = pymupdf4llm.to_markdown(pdf_file_path)
+
+        images_new_format = []
+
+        pdf_document = fitz.open(pdf_file_path)
+
+        for page_num in range(len(pdf_document)):
+            page = pdf_document.load_page(page_num)
+            images = page.get_images(full=True)
+            for img_index, img in enumerate(images):
+                xref = img[0]
+                base_image = pdf_document.extract_image(xref)
+                image_bytes = base_image["image"]
+                image_ext = base_image["ext"]
+                name = f"image_{page_num+1}_{img_index+1}.{image_ext}"
+
+                images_new_format.append(
+                    {
+                        "name": name,
+                        "image_base64": base64.b64encode(image_bytes).decode("utf-8"),
+                        "image_ext": image_ext,
+                    }
+                )
+
+        return markdown_text, markdown_text, images_new_format
 
     def extract_images(self, pdf_file_path: str) -> list:
+
         pdf_document = fitz.open(pdf_file_path)
 
         all_images = []
@@ -41,36 +130,6 @@ class PDFExtractor:
                         "image_ext": image_ext,
                     }
                 )
-
-        return all_images
-"""
-
-
-class PDFExtractorAPI:
-    def __init__(self):
-        pass
-
-    def extract_text_and_images(self, pdf_file_path: str) -> tuple[str, list]:
-        BASE_URL = "https://vlm2vec-pdf-api.runai-innovation-clement.inference.compute.datascience.ch"
-        # Send the request with the file directly
-        with open(pdf_file_path, "rb") as pdf_file:
-            files = {"pdf_file": (pdf_file_path, pdf_file, "application/pdf")}
-            response = requests.post(f"{BASE_URL}/v1/pdf_to_markdown", files=files)
-
-        # Process the response
-        result = response.json()
-        markdown_text = result["markdown"]
-        images = result["images"]
-
-        images_new_format = []
-        for image in images:
-            image_dict = {}
-            image_dict["name"] = image["filename"]
-            image_dict["image_base64"] = image["data"]
-            image_dict["image_ext"] = image["format"]
-            images_new_format.append(image_dict)
-
-        return result, markdown_text, images_new_format
 
 
 class SimpleChunker:
