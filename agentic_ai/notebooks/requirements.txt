@@ -7,3 +7,6 @@ matplotlib
 tiktoken
 smolagents[litellm]
 smolagents[gradio]
+markdownify
+duckduckgo-search
+requests
