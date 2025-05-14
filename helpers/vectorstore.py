@@ -2,7 +2,7 @@ import numpy as np
 
 import chromadb
 
-from src.data_classes import Chunk
+from .constants_and_data_classes import Chunk
 
 
 class ChromaDBVectorStore:
@@ -24,13 +24,13 @@ class ChromaDBVectorStore:
             else:
                 self.chunks = []
 
-    def insert_document(self, chunk: Chunk, embedding: np.ndarray):
+    def insert_chunk(self, chunk: Chunk, embedding: np.ndarray):
         embedding_list = embedding.tolist()
 
         self.collection.add(ids=[str(chunk.chunk_id)], embeddings=[embedding_list])
         self.chunks.append(chunk)
 
-    def insert_documents(self, chunks: list[Chunk], embeddings: list[np.ndarray]):
+    def insert_chunks(self, chunks: list[Chunk], embeddings: list[np.ndarray]):
         embeddings_list = [e.tolist() for e in embeddings]
 
         self.collection.add(

@@ -11,7 +11,7 @@ from openai import OpenAI
 
 from PIL import Image
 
-from src.constants_and_data_classes import Chunk, DataType, API_BASE_URL
+from .constants_and_data_classes import Chunk, DataType, API_BASE_URL
 
 
 class OpenAITextEmbeddings:
