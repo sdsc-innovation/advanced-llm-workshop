@@ -4,7 +4,7 @@ import requests
 import subprocess
 import base64
 
-from src.constants_and_data_classes import Chunk, DataType, API_BASE_URL
+from .constants_and_data_classes import Chunk, DataType, API_BASE_URL
 
 
 class PDFExtractor:

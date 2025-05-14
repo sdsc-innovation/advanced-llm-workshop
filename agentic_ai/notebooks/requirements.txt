@@ -1,9 +1,0 @@
-numpy
-pandas
-pydantic
-openai
-chromadb
-matplotlib
-tiktoken
-smolagents[litellm]
-smolagents[gradio]
