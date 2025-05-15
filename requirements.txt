@@ -11,3 +11,4 @@ markdownify==1.1.0
 duckduckgo_search==8.0.1
 requests==2.32.3
 pymupdf4llm==0.0.22
+ipykernel==6.29.5
