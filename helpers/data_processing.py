@@ -15,18 +15,22 @@ class PDFExtractor:
         self, pdf_file_path: str
     ) -> tuple[str, str, list[dict]]:
         if self.extractor is None:
-            try:
-                self.extractor = PDFExtractorAPI()
-                return self.extractor.extract_text_and_images(pdf_file_path)
-            except (requests.RequestException, Exception) as e:
-                print(
-                    "API IS NOT REACHABLE!\n"
-                    "Using fallback extractor instead: performances might be worse and "
-                    "notebook comments might not be matching the outputs!\n"
-                    f"{e}"
-                )
-                self.extractor = PDFExtractorFallback()
-                return self.extractor.extract_text_and_images(pdf_file_path)
+            # API Call temporarily removed for the PDFExtractor to reduce the number
+            # of requests to the RunAI server.
+
+            # try:
+            #     self.extractor = PDFExtractorAPI()
+            #     return self.extractor.extract_text_and_images(pdf_file_path)
+            # except (requests.RequestException, Exception) as e:
+            #     print(
+            #         "API IS NOT REACHABLE!\n"
+            #         "Using fallback extractor instead: performances might be worse and "
+            #         "notebook comments might not be matching the outputs!\n"
+            #         f"{e}"
+            #     )
+
+            self.extractor = PDFExtractorFallback()
+            return self.extractor.extract_text_and_images(pdf_file_path)
 
         return self.extractor.extract_text_and_images(pdf_file_path)
 
