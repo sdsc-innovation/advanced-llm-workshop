@@ -11,7 +11,7 @@ from openai import OpenAI
 
 from PIL import Image
 
-from .constants_and_data_classes import Chunk, DataType, API_BASE_URL
+from .constants_and_data_classes import Chunk, DataType, API_BASE_URL, API_TOKEN
 
 
 class OpenAITextEmbeddings:
@@ -102,12 +102,16 @@ class ImageEmbeddings:
 class VLM2VecTextEmbeddings:
     def __init__(self):
         self.base_url = API_BASE_URL
+        self.token = API_TOKEN
 
     # Work only with 1 text (no batching)
     def get_embedding(self, text: str) -> np.ndarray:
         text_data = {"text": text}
         url = f"{self.base_url}/v1/text_embeddings"
-        response = requests.post(url, json=text_data)
+        headers = {
+            "Authorization": f"Bearer {self.token}"
+        }
+        response = requests.post(url, json=text_data, headers=headers)
         # List of list because notebook expects a list of embeddings
         return np.array([response.json()["embeddings"]])
 
@@ -115,12 +119,16 @@ class VLM2VecTextEmbeddings:
 class VLM2VecImageEmbeddings:
     def __init__(self):
         self.base_url = API_BASE_URL
+        self.token = API_TOKEN
 
     # Work only with 1 image in base64 (no batching)
     def get_embedding(self, imagebase64: str) -> np.ndarray:
         image_data = {"imagebase64": imagebase64}
         url = f"{self.base_url}/v1/image_embeddings"
-        response = requests.post(url, json=image_data)
+        headers = {
+            "Authorization": f"Bearer {self.token}"
+        }
+        response = requests.post(url, json=image_data, headers=headers)
         return np.array(response.json()["embeddings"])
 
 
