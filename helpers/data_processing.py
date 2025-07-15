@@ -4,7 +4,7 @@ import requests
 import subprocess
 import base64
 
-from .constants_and_data_classes import Chunk, DataType, API_BASE_URL
+from .constants_and_data_classes import Chunk, DataType, API_BASE_URL, API_TOKEN
 
 
 class PDFExtractor:
@@ -18,16 +18,16 @@ class PDFExtractor:
             # API Call temporarily removed for the PDFExtractor to reduce the number
             # of requests to the RunAI server.
 
-            # try:
-            #     self.extractor = PDFExtractorAPI()
-            #     return self.extractor.extract_text_and_images(pdf_file_path)
-            # except (requests.RequestException, Exception) as e:
-            #     print(
-            #         "API IS NOT REACHABLE!\n"
-            #         "Using fallback extractor instead: performances might be worse and "
-            #         "notebook comments might not be matching the outputs!\n"
-            #         f"{e}"
-            #     )
+            try:
+                self.extractor = PDFExtractorAPI()
+                return self.extractor.extract_text_and_images(pdf_file_path)
+            except (requests.RequestException, Exception) as e:
+                print(
+                    "API IS NOT REACHABLE!\n"
+                    "Using fallback extractor instead: performances might be worse and "
+                    "notebook comments might not be matching the outputs!\n"
+                    f"{e}"
+                )
 
             self.extractor = PDFExtractorFallback()
             return self.extractor.extract_text_and_images(pdf_file_path)
@@ -43,9 +43,12 @@ class PDFExtractorAPI:
         self, pdf_file_path: str
     ) -> tuple[str, str, list[dict]]:
         # Send the request with the file directly
+        headers = {
+            "Authorization": f"Bearer {API_TOKEN}"
+        }
         with open(pdf_file_path, "rb") as pdf_file:
             files = {"pdf_file": (pdf_file_path, pdf_file, "application/pdf")}
-            response = requests.post(f"{API_BASE_URL}/v1/pdf_to_markdown", files=files)
+            response = requests.post(f"{API_BASE_URL}/v1/pdf_to_markdown", files=files, headers=headers)
 
         # Process the response
         result = response.json()
