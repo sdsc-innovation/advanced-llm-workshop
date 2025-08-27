@@ -1,6 +1,7 @@
 from typing import Optional
 
 from openai import OpenAI
+from openai import AzureOpenAI
 
 from .constants_and_data_classes import LLMMessage
 
@@ -44,6 +45,48 @@ class OpenAILLM:
             cost,
         )
 
+class OpenAILLMAzure:
+    def __init__(
+        self,
+        model_name: str = "gpt-4o-mini",
+        temperature=0.5,
+        seed=42,
+    ):
+        super().__init__()
+ 
+        self.client = AzureOpenAI(
+            azure_endpoint=os.environ["AZURE_API_BASE"],
+            api_key=os.environ["AZURE_API_KEY"],
+            api_version=os.environ["AZURE_API_VERSION"]
+        )
+        self.model = model_name
+        self.temperature = temperature
+        self.seed = seed
+ 
+        print(
+            f"OpenAI LLM loaded: {model_name}; temperature: {temperature}; seed: {seed}"
+        )
+
+    def generate(
+        self, conversation: list[dict[str, str]], verbose=True
+    ) -> tuple[LLMMessage, float]:
+        completion = self.client.chat.completions.create(
+            model=self.model,
+            messages=conversation,
+            temperature=self.temperature,
+            seed=self.seed,
+        )
+ 
+        cost = compute_chatgpt_4o_cost(completion, verbose=verbose)
+ 
+        return (
+            LLMMessage(
+                content=completion.choices[0].message.content,
+                role=completion.choices[0].message.role,
+                tool_calls=completion.choices[0].message.tool_calls,
+            ),
+            cost,
+        )
 
 def compute_chatgpt_4o_cost(completion, verbose: bool = False) -> float:
     input_tokens = completion.usage.prompt_tokens

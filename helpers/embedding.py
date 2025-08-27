@@ -30,6 +30,26 @@ class OpenAITextEmbeddings:
 
         return embeddings
 
+class OpenAITextEmbeddingsAzure:
+    def __init__(self, model_name: str = "text-embedding-3-large"):
+        self.client = AzureOpenAI(
+            azure_endpoint=os.environ["AZURE_API_BASE"],
+            api_key=os.environ["AZURE_API_KEY"],
+            api_version=os.environ["AZURE_API_VERSION"]
+        )
+        self.model_name = model_name
+ 
+    def get_embedding(self, texts: str | list[str]) -> np.ndarray:
+        if isinstance(texts, str):
+            texts = [texts]
+ 
+        response = self.client.embeddings.create(input=texts, model=self.model_name)
+        embeddings = np.asarray(
+            [response.data[i].embedding for i in range(len(response.data))]
+        )
+ 
+        return embeddings
+
 
 def compute_openai_large_embedding_cost(chunks, verbose: bool = True) -> float:
     encoder = tiktoken.get_encoding(
